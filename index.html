@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout – DigitalGraphicsStudio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark: #0d1117;
+      --dark2: #161b22;
+      --purple: #7c3aed;
+      --purple-light: #8b5cf6;
+      --teal: #06b6d4;
+      --bg: #f5f5f7;
+      --white: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--dark);
+      padding: 15px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .header-logo span {
+      color: var(--white);
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+    .header-secure {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .header-secure svg { width: 13px; height: 13px; fill: #10b981; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .breadcrumb span { color: var(--text); font-weight: 700; }
+
+    /* Layout */
+    .layout {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 370px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .order-summary { order: -1; }
+    }
+
+    /* Card */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 15px 22px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-header .step {
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      border-radius: 50%;
+      color: var(--white);
+      font-size: 0.65rem;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-body { padding: 22px; }
+
+    /* Form */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+      margin-bottom: 13px;
+    }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    input, select {
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--text);
+      background: #fafafa;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    input:focus, select:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+      background: var(--white);
+    }
+    input::placeholder { color: #d1d5db; }
+
+    .card-number-wrap { position: relative; }
+    .card-number-wrap input {
+      padding-right: 80px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1.5px;
+    }
+    .card-icons-inline {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    /* Checkboxes */
+    .check-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px 14px;
+      background: #fafbff;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .check-item:has(input:checked) {
+      border-color: var(--purple);
+      background: #f5f3ff;
+    }
+    .check-item input[type="checkbox"] {
+      width: 17px; height: 17px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      accent-color: var(--purple);
+      cursor: pointer;
+    }
+    .check-item label {
+      font-size: 0.81rem;
+      color: var(--text);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
+      line-height: 1.55;
+    }
+    .check-item label a {
+      color: var(--purple);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .disclaimer {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.55;
+      padding: 11px 14px;
+      background: #f5f3ff;
+      border-radius: 8px;
+      border-left: 3px solid var(--purple);
+      margin-bottom: 16px;
+    }
+
+    /* Submit */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--teal) 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Order Summary */
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .order-item:last-of-type { border-bottom: none; }
+    .order-item-name { font-size: 0.88rem; font-weight: 700; line-height: 1.4; }
+    .order-item-desc { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+    .order-item-price { font-size: 0.9rem; font-weight: 800; white-space: nowrap; }
+
+    .order-totals { padding: 14px 0 4px; }
+    .order-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .order-total-row.final {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 2px solid var(--text);
+    }
+
+    /* Badges */
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .badge svg { width: 11px; height: 11px; }
+
+    /* Payment logos */
+    .payment-logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .pay-logo {
+      height: 25px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 8px;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+    .pay-visa { color: #1a1f71; }
+    .pay-mc { gap: 0; }
+    .pay-mc .c1 { width: 15px; height: 15px; background: #eb001b; border-radius: 50%; }
+    .pay-mc .c2 { width: 15px; height: 15px; background: #f79e1b; border-radius: 50%; margin-left: -6px; }
+    .pay-amex { color: #007bc1; font-style: italic; }
+    .pay-apple { color: #000; }
+    .pay-gpay .g { color: #4285f4; }
+    .pay-gpay .o { color: #ea4335; }
+    .pay-gpay .o2 { color: #fbbc05; }
+    .pay-gpay .g2 { color: #34a853; }
+    .pay-gpay .le { color: #5f6368; }
+
+    .checkout-footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .checkout-footer a { color: var(--muted); text-decoration: underline; }
+
+    .field-error { font-size: 0.71rem; color: var(--error); margin-top: 3px; display: none; }
+    input.invalid, select.invalid { border-color: var(--error); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="https://digitalgraphicsstudio.us" class="header-logo">
+    <div class="logo-mark">🎨</div>
+    <span>DigitalGraphicsStudio</span>
+  </a>
+  <div class="header-secure">
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    256-bit SSL Secured
+  </div>
+</header>
+
+<div class="breadcrumb">
+  Cart &rsaquo; <span>Checkout</span> &rsaquo; Confirmation
+</div>
+
+<div class="layout">
+  <!-- LEFT -->
+  <div>
+    <!-- Contact -->
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-header"><div class="step">1</div>Contact Information</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="fname" placeholder="Jane" autocomplete="given-name">
+            <span class="field-error" id="fname-err">Required</span>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lname" placeholder="Smith" autocomplete="family-name">
+            <span class="field-error" id="lname-err">Required</span>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="jane@example.com" autocomplete="email">
+            <span class="field-error" id="email-err">Valid email required</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-header"><div class="step">2</div>Billing Address</div>
+      <div class="card-body">
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Country</label>
+            <select id="country">
+              <option value="US">United States</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Street Address</label>
+            <input type="text" id="address" placeholder="123 Main Street" autocomplete="street-address">
+            <span class="field-error" id="address-err">Required</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="city" placeholder="Chicago" autocomplete="address-level2">
+            <span class="field-error" id="city-err">Required</span>
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <select id="state">
+              <option value="">Select state</option>
+              <option>Alabama</option><option>Alaska</option><option>Arizona</option>
+              <option>Arkansas</option><option>California</option><option>Colorado</option>
+              <option>Connecticut</option><option>Delaware</option><option>Florida</option>
+              <option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+              <option>Illinois</option><option>Indiana</option><option>Iowa</option>
+              <option>Kansas</option><option>Kentucky</option><option>Louisiana</option>
+              <option>Maine</option><option>Maryland</option><option>Massachusetts</option>
+              <option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+              <option>Missouri</option><option>Montana</option><option>Nebraska</option>
+              <option>Nevada</option><option>New Hampshire</option><option>New Jersey</option>
+              <option>New Mexico</option><option>New York</option><option>North Carolina</option>
+              <option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+              <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option>
+              <option>South Carolina</option><option>South Dakota</option><option>Tennessee</option>
+              <option>Texas</option><option>Utah</option><option>Vermont</option>
+              <option>Virginia</option><option>Washington</option><option>West Virginia</option>
+              <option>Wisconsin</option><option>Wyoming</option>
+            </select>
+            <span class="field-error" id="state-err">Required</span>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>ZIP Code</label>
+            <input type="text" id="zip" placeholder="60601" maxlength="10" autocomplete="postal-code">
+            <span class="field-error" id="zip-err">Required</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-header"><div class="step">3</div>Payment Details</div>
+      <div class="card-body">
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Name on Card</label>
+            <input type="text" id="cardname" placeholder="Jane Smith" autocomplete="cc-name">
+            <span class="field-error" id="cardname-err">Required</span>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Card Number</label>
+            <div class="card-number-wrap">
+              <input type="text" id="cardnum" placeholder="1234  5678  9012  3456" maxlength="19" autocomplete="cc-number" inputmode="numeric">
+              <div class="card-icons-inline">
+                <span class="pay-logo pay-visa" style="border:none;padding:0;font-size:0.6rem;font-weight:900;">VISA</span>
+                <span class="pay-logo pay-mc" style="border:none;padding:0;display:flex;">
+                  <span class="c1"></span><span class="c2"></span>
+                </span>
+              </div>
+            </div>
+            <span class="field-error" id="cardnum-err">Valid card number required</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="text" id="expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+            <span class="field-error" id="expiry-err">Required</span>
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" id="cvv" placeholder="•••" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+            <span class="field-error" id="cvv-err">Required</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agreements -->
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-header"><div class="step">4</div>Order Agreement</div>
+      <div class="card-body">
+        <div class="disclaimer">
+          You are purchasing from <strong>DigitalGraphicsStudio (digitalgraphicsstudio.us)</strong>, a digital graphic design file delivery service — this is a one-time purchase with no recurring charges.
+        </div>
+        <div class="check-list">
+          <div class="check-item">
+            <input type="checkbox" id="chk-terms">
+            <label for="chk-terms">I have read and agree to the <a href="https://digitalgraphicsstudio.us/policies/terms-of-service" target="_blank">Terms of Service</a>. I understand this is a digital product and all sales are subject to the stated terms.</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="chk-refund">
+            <label for="chk-refund">I have read and agree to the <a href="https://digitalgraphicsstudio.us/policies/refund-policy" target="_blank">Refund Policy</a>. I understand the conditions under which refunds may be issued for digital products.</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="chk-privacy">
+            <label for="chk-privacy">I have read and agree to the <a href="https://digitalgraphicsstudio.us/policies/privacy-policy" target="_blank">Privacy Policy</a> and consent to my information being used to process this transaction.</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="chk-onetime">
+            <label for="chk-onetime">I confirm this is a <strong>one-time purchase</strong>. I understand my card will be charged once and there are no subscriptions or recurring billing associated with this order.</label>
+          </div>
+        </div>
+        <span class="field-error" id="chk-err" style="display:none;">Please agree to all terms to continue.</span>
+        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+          Complete Purchase &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Summary -->
+  <div class="order-summary">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="step" style="background:linear-gradient(135deg,var(--purple),var(--teal))">✓</div>Order Summary</div>
+      <div class="card-body">
+        <div class="order-item">
+          <div>
+            <div class="order-item-name" id="prod-name">Social Media Graphics Pack</div>
+            <div class="order-item-desc">Instant digital delivery · Full commercial license</div>
+          </div>
+          <div class="order-item-price">$49.00</div>
+        </div>
+        <div class="order-totals">
+          <div class="order-total-row"><span>Subtotal</span><span>$49.00</span></div>
+          <div class="order-total-row"><span>Digital Delivery</span><span style="color:var(--success);">FREE</span></div>
+          <div class="order-total-row final"><span>Total</span><span>$49.00</span></div>
+        </div>
+        <div class="trust-badges">
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            SSL Secured
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            30-Day Guarantee
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            One-Time Charge
+          </div>
+        </div>
+        <div class="payment-logos">
+          <span class="pay-logo pay-visa">VISA</span>
+          <span class="pay-logo pay-mc"><span class="c1"></span><span class="c2"></span></span>
+          <span class="pay-logo pay-amex">AMEX</span>
+          <span class="pay-logo pay-apple">🍎 Pay</span>
+          <span class="pay-logo pay-gpay">
+            <span class="g">G</span><span class="o">o</span><span class="o2">o</span><span class="g2">g</span><span class="le">le Pay</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--muted);line-height:1.7;padding:0 4px;">
+      Need help? <a href="https://digitalgraphicsstudio.us/policies/contact-information" style="color:var(--purple);">Contact Support</a><br>
+      Naturell Books LLC · 5654 Maple Ln, Newburgh, IN 47630
+    </div>
+  </div>
+</div>
+
+<div class="checkout-footer">
+  &copy; 2026 DigitalGraphicsStudio / Naturell Books LLC ·
+  <a href="https://digitalgraphicsstudio.us/policies/privacy-policy">Privacy Policy</a> ·
+  <a href="https://digitalgraphicsstudio.us/policies/terms-of-service">Terms of Service</a> ·
+  <a href="https://digitalgraphicsstudio.us/policies/refund-policy">Refund Policy</a>
+  <br>5654 Maple Ln, Newburgh, IN 47630, United States
+</div>
+
+<script>
+  document.getElementById('cardnum').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1  ').trim();
+  });
+
+  document.getElementById('expiry').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+    if (v.length >= 3) v = v.substring(0,2) + ' / ' + v.substring(2);
+    e.target.value = v;
+  });
+
+  document.getElementById('cvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  });
+
+  function showError(id, errId) {
+    document.getElementById(id).classList.add('invalid');
+    document.getElementById(errId).style.display = 'block';
+  }
+  function clearError(id, errId) {
+    document.getElementById(id).classList.remove('invalid');
+    document.getElementById(errId).style.display = 'none';
+  }
+
+  function handleSubmit() {
+    let valid = true;
+    const required = [
+      ['fname','fname-err'],['lname','lname-err'],['email','email-err'],
+      ['address','address-err'],['city','city-err'],['state','state-err'],
+      ['zip','zip-err'],['cardname','cardname-err'],['cardnum','cardnum-err'],
+      ['expiry','expiry-err'],['cvv','cvv-err']
+    ];
+    required.forEach(([fid, eid]) => {
+      const el = document.getElementById(fid);
+      if (!el.value.trim()) { showError(fid, eid); valid = false; }
+      else clearError(fid, eid);
+    });
+
+    const email = document.getElementById('email').value;
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('email','email-err'); valid = false;
+    }
+
+    const checks = ['chk-terms','chk-refund','chk-privacy','chk-onetime'];
+    const allChecked = checks.every(id => document.getElementById(id).checked);
+    if (!allChecked) {
+      document.getElementById('chk-err').style.display = 'block'; valid = false;
+    } else {
+      document.getElementById('chk-err').style.display = 'none';
+    }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+    setTimeout(() => {
+      window.location.href = 'https://digitalgraphicsstudio.us/pages/order-confirmation';
+    }, 2000);
+  }
+</script>
+</body>
+</html>
